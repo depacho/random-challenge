@@ -69,35 +69,29 @@
 <body>
     <h5 style="text-align: left;">最終更新　2024/08/10　作成者@deppa_game</h5>
     <h2 style="text-align: center;">好きな項目をランダムで抽選するツール</h2>
-
-
+    <div>
+        <label><input type="radio" name="drawType" value="allowDuplicates" checked> 同じ選択項目を何度でも抽選可能にする</label>
+        <label><input type="radio" name="drawType" value="disallowDuplicates"> 同じ選択項目は抽選されないようにする</label>
+    </div>
     <button id="drawButton" onclick="draw()">抽選する</button>
-
     <div id="result"></div>
     <div id="remainingChoices"></div>
-
     <button class="toggle-btn" onclick="toggleInputArea()">選択肢を表示／非表示</button>
-
     <div id="inputArea">
         <textarea id="inputText" placeholder="選択項目を改行で入力してください"></textarea>
     </div>
-
     <script>
         let items = [];
         let drawnItems = [];
-
         function toggleInputArea() {
             const inputArea = document.getElementById('inputArea');
             inputArea.style.display = inputArea.style.display === 'none' ? 'block' : 'none';
         }
-
         function draw() {
             const inputText = document.getElementById('inputText').value;
             items = inputText.split('\n').map(item => item.trim()).filter(item => item !== '');
-
             const resultDiv = document.getElementById('result');
             const remainingChoicesDiv = document.getElementById('remainingChoices');
-
             // 選択肢がない場合
             if (items.length === 0) {
                 resultDiv.innerHTML = '選択項目がありません。';
@@ -105,28 +99,32 @@
                 return;
             }
 
-            // 重複を許可しない場合
-            if (drawnItems.length >= items.length) {
-                resultDiv.innerHTML = 'おつかれさまでした';
-                remainingChoicesDiv.innerHTML = ''; // 残り選択肢は空にする
-                return;
-            }
+            const drawType = document.querySelector('input[name="drawType"]:checked').value;
 
-            let randomIndex;
             let result;
-
-            // 重複しない項目からランダムに選ぶ
-            do {
-                randomIndex = Math.floor(Math.random() * items.length);
+            if (drawType === 'allowDuplicates') {
+                // 重複を許可する場合
+                const randomIndex = Math.floor(Math.random() * items.length);
                 result = items[randomIndex];
-            } while (drawnItems.includes(result));
-
-            drawnItems.push(result);
+            } else {
+                // 重複を許可しない場合
+                if (drawnItems.length >= items.length) {
+                    resultDiv.innerHTML = '選択肢はゼロになりました。';
+                    remainingChoicesDiv.innerHTML = ''; // 残り選択肢は空にする
+                    return;
+                }
+                let randomIndex;
+                do {
+                    randomIndex = Math.floor(Math.random() * items.length);
+                    result = items[randomIndex];
+                } while (drawnItems.includes(result));
+                drawnItems.push(result);
+            }
 
             // 残りの選択肢の表示
             const remainingCount = items.length - drawnItems.length;
             resultDiv.innerHTML = `選ばれた項目: <span class="selected">${result}</span>`;
-            remainingChoicesDiv.innerHTML = `残りの選択肢: ${remainingCount}個のうち${items.length}個選択済み`;
+            remainingChoicesDiv.innerHTML = `残りの選択肢: ${remainingCount}個`;
         }
     </script>
 </body>
